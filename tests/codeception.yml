@@ -1,0 +1,22 @@
+# suite config
+suites:
+    api:
+        actor: ApiTester
+        path: .
+        modules:
+            enabled:
+                - REST:
+                    url: http://localhost/restapi/public
+                    depends: PhpBrowser
+
+paths:
+    tests: ./
+    output: ./_output
+    data: ./_data
+    support: ./_support
+
+settings:
+    shuffle: false
+    lint: true
+    colors: false
+    bootstrap: _bootstrap.php
