@@ -2,12 +2,18 @@
 suites:
     api:
         actor: ApiTester
-        path: .
+        path: ./api
         modules:
             enabled:
                 - REST:
                     url: http://localhost/restapi/public
                     depends: PhpBrowser
+    unit:
+        actor: UnitTester
+        modules:
+            enabled:
+                - Asserts
+                - \Helper\Unit
 
 paths:
     tests: ./
