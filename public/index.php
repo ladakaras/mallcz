@@ -1,34 +1,36 @@
 <?php
 
-use \Psr\Http\Message\ServerRequestInterface as Request;
-use \Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
+use Psr\Http\Message\ResponseInterface as Response;
+use PhpAmqpLib\Connection\AMQPStreamConnection;
+use PhpAmqpLib\Message\AMQPMessage;
 
 require '../vendor/autoload.php';
 
-$settings['displayErrorDetails'] = true;
-$settings['addContentLengthHeader'] = false;
-
-$settings['db']['host'] = '127.0.0.1';
-$settings['db']['user'] = 'root';
-$settings['db']['pass'] = '';
-$settings['db']['dbname'] = 'restapi';
+$settings = parse_ini_file(__DIR__ . '/../config/config.ini', true, INI_SCANNER_TYPED);
 
 $app = new \Slim\App(['settings' => $settings]);
 
 $container = $app->getContainer();
 
 $container['db'] = function ($c) {
-	$db = $c['settings']['db'];
-	$pdo = new PDO('mysql:host=' . $db['host'] . ';dbname=' . $db['dbname'] . ';charset=utf8', $db['user'], $db['pass']);
-	$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-	$pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-	return $pdo;
+	return new Medoo\Medoo($c['settings']['db']);
+};
+
+require '../include/CustomerModel.php';
+require '../include/BadInputException.php';
+$container['customerModel'] = function ($c) {
+	return new CustomerModel($c->db);
+};
+
+$container['rabbitMQ'] = function ($c) {
+	$rabbitMQ = $c['settings']['rabbitMQ'];
+
+	return new AMQPStreamConnection($rabbitMQ['host'], $rabbitMQ['port'], $rabbitMQ['user'], $rabbitMQ['pass']);
 };
 
 $app->get('/customer', function (Request $request, Response $response, array $args) {
-	$sth = $this->db->prepare("SELECT `id`, `first_name`, `last_name` FROM `customer`");
-	$sth->execute();
-	$customers = $sth->fetchAll(PDO::FETCH_ASSOC);
+	$customers = $this->customerModel->getAll();
 
 	return $response->withStatus(200)
 			->withHeader('Content-Type', 'application/json')
@@ -36,13 +38,17 @@ $app->get('/customer', function (Request $request, Response $response, array $ar
 });
 
 $app->get('/customer/{id}', function (Request $request, Response $response, array $args) {
-	$sth = $this->db->prepare("SELECT `id`, `first_name`, `last_name` FROM `customer` WHERE `id` = ?");
-	$sth->execute([$args['id']]);
-	$customers = $sth->fetchAll(PDO::FETCH_ASSOC);
+	$customer = $this->customerModel->get($args['id']);
+
+	if($customer === []) {
+		return $response->withStatus(404)
+				->withHeader('Content-Type', 'application/json')
+				->write(json_encode(['message' => 'Customer not found.']));
+	}
 
 	return $response->withStatus(200)
 			->withHeader('Content-Type', 'application/json')
-			->write(json_encode($customers));
+			->write(json_encode($customer));
 });
 
 $app->post('/customer', function (Request $request, Response $response) {
@@ -51,16 +57,57 @@ $app->post('/customer', function (Request $request, Response $response) {
 
 	$data = json_decode($bodyContent, true);
 
-	$sth = $this->db->prepare("INSERT INTO `customer` (`first_name`, `last_name`, `email`) VALUES(?, ?, ?)");
-	$sth->execute([$data['first_name'], $data['last_name'], $data['email']]);
+	try {
+		$customer_id = $this->customerModel->insert($data);
+	} catch(BadInputException $exc) {
+		return $response->withStatus(400)
+				->withHeader('Content-Type', 'application/json')
+				->write(json_encode(['message' => $exc->getInputMessage()]));
+	}
 
-	$customer_id = $this->db->lastInsertId();
-	
-	// TODO ADD To Rabit MQ
+	$connection = $this->rabbitMQ;
+	$channel = $connection->channel();
+	$channel->queue_declare('worker', false, true, false, false);
+
+	$msg = new AMQPMessage(json_encode(['action' => 'registration_email', 'data' => ['email' => $data['email'], 'first_name' => $data['first_name'], 'last_name' => $data['last_name']]]), ['delivery_mode' => AMQPMessage::DELIVERY_MODE_PERSISTENT]);
+	$channel->basic_publish($msg, '', 'hello');
+
+	$channel->close();
+	$connection->close();
 
 	return $response->withStatus(201)
 			->withHeader('Content-Type', 'application/json')
 			->write(json_encode(["id" => $customer_id]));
+});
+
+$app->put('/customer/{id}', function (Request $request, Response $response, array $args) {
+	if($this->customerModel->exist($args['id']) === false) {
+		return $response->withStatus(404)
+				->withHeader('Content-Type', 'application/json')
+				->write(json_encode(['message' => 'Customer not found.']));
+	}
+
+	$bodyContent = $request->getBody()->getContents();
+
+	$data = json_decode($bodyContent, true);
+
+	$updated = $this->customerModel->update($args['id'], $data);
+
+	return $response->withStatus(200)
+			->withHeader('Content-Type', 'application/json')
+			->write(json_encode(['message' => $updated ? 'Customer updated.' : 'Nothing change.']));
+});
+
+$app->delete('/customer/{id}', function (Request $request, Response $response, array $args) {
+	if($this->customerModel->delete($args['id'])) {
+		return $response->withStatus(200)
+				->withHeader('Content-Type', 'application/json')
+				->write(json_encode(['message' => 'Customer deleted.']));
+	} else {
+		return $response->withStatus(404)
+				->withHeader('Content-Type', 'application/json')
+				->write(json_encode(['message' => 'Customer not found.']));
+	}
 });
 
 $app->run();
