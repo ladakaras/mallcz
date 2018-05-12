@@ -5,9 +5,12 @@ use Psr\Http\Message\ResponseInterface as Response;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 use PhpAmqpLib\Message\AMQPMessage;
 
-require '../vendor/autoload.php';
+define('ROOT_DIR', '/restapi/');
+define('API_DIR', ROOT_DIR . '/api/');
 
-$settings = parse_ini_file(__DIR__ . '/../../config/config.ini', true, INI_SCANNER_TYPED);
+require_once API_DIR . 'vendor/autoload.php';
+
+$settings = parse_ini_file(ROOT_DIR . 'config/config.ini', true, INI_SCANNER_TYPED);
 
 $app = new \Slim\App(['settings' => $settings]);
 
