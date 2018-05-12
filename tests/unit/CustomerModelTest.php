@@ -1,6 +1,6 @@
 <?php
 
-require '../include/CustomerModel.php';
+require '../api/include/CustomerModel.php';
 
 class CustomerModelTest extends \Codeception\TestCase\Test {
 

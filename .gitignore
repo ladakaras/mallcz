@@ -1,3 +1,5 @@
 /nbproject/*
-/vendor/*
+/bin/vendor/*
+/api/vendor/*
+/tests/vendor/*
 /tests/_output/*

@@ -7,7 +7,7 @@ use PhpAmqpLib\Message\AMQPMessage;
 
 require '../vendor/autoload.php';
 
-$settings = parse_ini_file(__DIR__ . '/../config/config.ini', true, INI_SCANNER_TYPED);
+$settings = parse_ini_file(__DIR__ . '/../../config/config.ini', true, INI_SCANNER_TYPED);
 
 $app = new \Slim\App(['settings' => $settings]);
 

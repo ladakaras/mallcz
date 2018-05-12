@@ -2,9 +2,11 @@
 
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 
-require '../vendor/autoload.php';
+require __dir__ . '/vendor/autoload.php';
 
-$connection = new AMQPStreamConnection('localhost', 5672, 'guest', 'guest');
+$settings = parse_ini_file(__DIR__ . '/../config/config.ini', true, INI_SCANNER_TYPED);
+
+$connection = new AMQPStreamConnection($settings['rabbitMQ']['host'], $settings['rabbitMQ']['port'], $settings['rabbitMQ']['user'], $settings['rabbitMQ']['pass']);
 $channel = $connection->channel();
 
 $channel->queue_declare('worker', false, true, false, false);
@@ -14,7 +16,7 @@ echo ' [*] Waiting for messages. To exit press CTRL+C', "\n";
 $callback = function($msg) {
 	echo " [x] Received ", $msg->body, "\n";
 
-	$json = GuzzleHttp\json_decode($msg->body, true);
+	$json = json_decode($msg->body, true);
 
 	if(is_array($json) && isset($json['action'])) {
 		switch($json['action']) {

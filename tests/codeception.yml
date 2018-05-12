@@ -6,7 +6,7 @@ suites:
         modules:
             enabled:
                 - REST:
-                    url: http://localhost/restapi/public
+                    url: http://localhost/restapi/api/public
                     depends: PhpBrowser
     unit:
         actor: UnitTester

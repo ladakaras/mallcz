@@ -1,11 +1,8 @@
 <?php
 
-$settings['db']['host'] = '127.0.0.1';
-$settings['db']['user'] = 'root';
-$settings['db']['pass'] = '';
-$settings['db']['dbname'] = 'restapi';
+$settings = parse_ini_file(__DIR__ . '/../config/config.ini', true, INI_SCANNER_TYPED);
 
-$pdo = new PDO('mysql:host=' . $settings['db']['host'] . ';dbname=' . $settings['db']['dbname'] . ';charset=utf8', $settings['db']['user'], $settings['db']['pass']);
+$pdo = new PDO('mysql:host=' . $settings['db']['server'] . ';dbname=' . $settings['db']['database_name'] . ';charset=' . $settings['db']['charset'], $settings['db']['username'], $settings['db']['password']);
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
 

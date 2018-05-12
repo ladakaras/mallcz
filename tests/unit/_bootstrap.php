@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__ . '/../../include/BadInputException.php';
+require_once __DIR__ . '/../../api/include/BadInputException.php';
 //$settings['db']['host'] = '127.0.0.1';
 //$settings['db']['user'] = 'root';
 //$settings['db']['pass'] = '';
