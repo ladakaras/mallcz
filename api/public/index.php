@@ -6,6 +6,7 @@ use PhpAmqpLib\Connection\AMQPStreamConnection;
 use PhpAmqpLib\Message\AMQPMessage;
 
 define('ROOT_DIR', '/restapi/');
+//define('ROOT_DIR', __DIR__ . '/../../');
 define('API_DIR', ROOT_DIR . '/api/');
 
 require_once API_DIR . 'vendor/autoload.php';
@@ -20,8 +21,8 @@ $container['db'] = function ($c) {
 	return new Medoo\Medoo($c['settings']['db']);
 };
 
-require '../include/CustomerModel.php';
-require '../include/BadInputException.php';
+require API_DIR . 'include/CustomerModel.php';
+require API_DIR . 'include/BadInputException.php';
 $container['customerModel'] = function ($c) {
 	return new CustomerModel($c->db);
 };
