@@ -2,7 +2,7 @@ FROM php:7-apache
 
 MAINTAINER Ladislav Karas
 
-COPY ./api /restapi/api
+COPY . /restapi/api
 
 WORKDIR /restapi/api
 

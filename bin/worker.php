@@ -2,9 +2,9 @@
 
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 
-require __dir__ . '/vendor/autoload.php';
+require __DIR__ . '/vendor/autoload.php';
 
-$settings = parse_ini_file(__DIR__ . '/../config/config.ini', true, INI_SCANNER_TYPED);
+$settings = parse_ini_file(__DIR__ . '/config/config.ini', true, INI_SCANNER_TYPED);
 
 $connection = new AMQPStreamConnection($settings['rabbitMQ']['host'], $settings['rabbitMQ']['port'], $settings['rabbitMQ']['user'], $settings['rabbitMQ']['pass']);
 $channel = $connection->channel();
@@ -49,7 +49,7 @@ $callback = function($msg) {
 };
 
 $channel->basic_qos(null, 1, null);
-$channel->basic_consume('hello', '', false, false, false, false, $callback);
+$channel->basic_consume('worker', '', false, false, false, false, $callback);
 
 while(count($channel->callbacks)) {
 	$channel->wait();

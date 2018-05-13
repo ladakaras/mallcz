@@ -5,9 +5,8 @@ use Psr\Http\Message\ResponseInterface as Response;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 use PhpAmqpLib\Message\AMQPMessage;
 
-define('ROOT_DIR', '/restapi/');
-//define('ROOT_DIR', __DIR__ . '/../../');
-define('API_DIR', ROOT_DIR . '/api/');
+define('ROOT_DIR', __DIR__ . '/../../');
+define('API_DIR', ROOT_DIR . 'api/');
 
 require_once API_DIR . 'vendor/autoload.php';
 
@@ -74,7 +73,7 @@ $app->post('/customer', function (Request $request, Response $response) {
 	$channel->queue_declare('worker', false, true, false, false);
 
 	$msg = new AMQPMessage(json_encode(['action' => 'registration_email', 'data' => ['email' => $data['email'], 'first_name' => $data['first_name'], 'last_name' => $data['last_name']]]), ['delivery_mode' => AMQPMessage::DELIVERY_MODE_PERSISTENT]);
-	$channel->basic_publish($msg, '', 'hello');
+	$channel->basic_publish($msg, '', 'worker');
 
 	$channel->close();
 	$connection->close();
