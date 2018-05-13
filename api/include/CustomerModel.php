@@ -31,6 +31,9 @@ class CustomerModel {
 		$resource = $dbRow;
 
 		$resource['id'] = intval($dbRow['id']);
+		if(isset($dbRow['date_registrated'])) {
+			$resource['date_registrated'] = date('Y-m-d\TH:i:s.v\Z', strtotime($dbRow['date_registrated']));
+		}
 
 		return $resource;
 	}
@@ -77,7 +80,7 @@ class CustomerModel {
 	 * @return array
 	 */
 	public function get(int $id): array {
-		$row = $this->_database->get(self::TABLE, ['id', 'first_name', 'last_name', 'email'], ['id' => $id]);
+		$row = $this->_database->get(self::TABLE, ['id', 'first_name', 'last_name', 'email', 'date_registrated'], ['id' => $id]);
 
 		return $row === false ? [] : self::dbRowToResource($row);
 	}
@@ -87,7 +90,7 @@ class CustomerModel {
 	 * @return array
 	 */
 	public function getAll(): array {
-		$rows = $this->_database->select(self::TABLE, ['id', 'first_name', 'last_name', 'email']);
+		$rows = $this->_database->select(self::TABLE, ['id', 'first_name', 'last_name', 'email', 'date_registrated']);
 
 		$return = [];
 
@@ -106,6 +109,8 @@ class CustomerModel {
 	 */
 	public function insert(array $resource): int {
 		$dbRow = self::resourceToDbRow($resource);
+
+		$dbRow['date_registrated'] = date('Y-m-d H:i:s');
 
 		$this->_database->insert(self::TABLE, $dbRow);
 

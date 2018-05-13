@@ -54,9 +54,10 @@ class CustomerModelTest extends \Codeception\TestCase\Test {
 	}
 
 	public function testDbRowToResource() {
-		$resource = CustomerModel::dbRowToResource(['id' => '5', 'first_name' => 'Lada']);
+		$resource = CustomerModel::dbRowToResource(['id' => '5', 'first_name' => 'Lada', 'date_registrated' => '2017-05-03 17:03:02']);
 
 		$this->assertSame(5, $resource['id']);
+		$this->assertSame('2017-05-03T17:03:02.000Z', $resource['date_registrated']);
 	}
 
 }

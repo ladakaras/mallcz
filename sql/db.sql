@@ -3,5 +3,6 @@ CREATE TABLE `customer` (
   `first_name` varchar(60) NOT NULL,
   `last_name` varchar(60) NOT NULL,
   `email` varchar(255) NOT NULL,
+  `date_registrated` DATETIME,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

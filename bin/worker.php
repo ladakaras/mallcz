@@ -11,11 +11,9 @@ $channel = $connection->channel();
 
 $channel->queue_declare('worker', false, true, false, false);
 
-echo ' [*] Waiting for messages. To exit press CTRL+C', "\n";
+echo 'Worker running. To exit press CTRL+C', "\n";
 
 $callback = function($msg) {
-	echo " [x] Received ", $msg->body, "\n";
-
 	$json = json_decode($msg->body, true);
 
 	if(is_array($json) && isset($json['action'])) {
