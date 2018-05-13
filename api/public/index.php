@@ -11,7 +11,7 @@ define('API_DIR', ROOT_DIR . '/api/');
 
 require_once API_DIR . 'vendor/autoload.php';
 
-$settings = parse_ini_file(ROOT_DIR . 'config/config.ini', true, INI_SCANNER_TYPED);
+$settings = parse_ini_file(API_DIR . 'config/config.ini', true, INI_SCANNER_TYPED);
 
 $app = new \Slim\App(['settings' => $settings]);
 
