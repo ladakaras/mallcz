@@ -1,0 +1,135 @@
+FORMAT: 1A
+HOST: http://polls.apiblueprint.org/
+
+# ladakaras
+
+API for admin customers
+
+## Customers Collection [/customers]
+
+### List All Customers [GET]
+
++ Response 200 (application/json)
+
+        [
+            {
+                "id": 1,
+                "first_name": "Ladislav",
+                "last_name": "Karas",
+                "email": "ladakaras@seznam.cz",
+                "date_registrated": "2018-05-13T21:50:05.000Z"
+            }
+        ]
+
+### Create a New Customer [POST]
+
++ Request (application/json)
+
+        {
+            "first_name": "Eva",
+            "last_name": "Karasová",
+            "email": "evakaras@centrum.cz"
+        }
+
++ Response 201 (application/json)
+
+    + Headers
+
+            Location: /customers/2
+
+    + Body
+
+            {
+                "id": 2,
+                "first_name": "Eva",
+                "last_name": "Karasová",
+                "email": "evakaras@centrum.cz",
+                "date_registrated": "2018-05-13T22:37:05.000Z"
+            }
+            
++ Response 400 (application/json)
+
+    + Body
+
+            {
+                "message":"Input `email` must be valid email address."
+            }
+            
+            
+## Customer actions [/customers/{id}]
+
+### Get a Customer [GET]
+
++ Response 200 (application/json)
+
+    + Body
+
+            {
+                "id": 2,
+                "first_name": "New name",
+                "last_name": "Karasová",
+                "email": "evakaras@centrum.cz",
+                "date_registrated": "2018-05-13T22:37:05.000Z"
+            }
+            
++ Response 404 (application/json)
+
+    + Body
+
+            {
+                "message":"Customer not found."
+            }
+
+### Update a Customer [PUT]
+
++ Request (application/json)
+
+        {
+            "first_name": "New name"
+        }
+
++ Response 200 (application/json)
+
+    + Body
+
+            {
+                "id": 2,
+                "first_name": "New name",
+                "last_name": "Karasová",
+                "email": "evakaras@centrum.cz",
+                "date_registrated": "2018-05-13T22:37:05.000Z"
+            }
+            
++ Response 400 (application/json)
+
+    + Body
+
+            {
+                "message":"Input `email` must be valid email address."
+            }
+            
++ Response 404 (application/json)
+
+    + Body
+
+            {
+                "message":"Customer not found."
+            }
+
+### Delete a Customer [DELETE]
+
++ Response 200 (application/json)
+
+    + Body
+
+            {
+                "message": "Customer deleted."
+            }
+            
++ Response 404 (application/json)
+
+    + Body
+
+            {
+                "message":"Customer not found."
+            }
